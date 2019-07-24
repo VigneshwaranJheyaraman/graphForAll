@@ -1,26 +1,22 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Canvas from './components/Canvas';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container-fluid">
+      <Canvas yAxis={getRandomList(50)} xAxis={getRandomList(50)}/>
     </div>
   );
 }
 
+function getRandomList(size)
+{
+  let randomNumbers =[];
+  for(var i=0;i<size;i++)
+  {
+    randomNumbers.push(Math.floor(Math.random() * size));
+  }
+  return randomNumbers;
+}
 export default App;
