@@ -187,8 +187,8 @@ class Canvas extends Component
 		context.lineTo((this.state.graphCanvas.width - this.state.graphMargin),this.state.mouseY );
 		if(showCoord)
 		{
-			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) * (this.getMinElement(this.props.xAxis) + this.state.xAxisCD) / this.state.xAxisCD);
-			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * (this.getMinElement(this.props.yAxis)+this.state.yAxisCD) / this.state.yAxisCD);
+			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) *  this.state.xAxisCD);
+			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * this.state.yAxisCD);
 			this.props.yAxis.forEach((v,i) => {
 				/* if(xValue === this.props.xAxis[i] && yValue === v)
 				{
@@ -197,8 +197,8 @@ class Canvas extends Component
 				} */
 			});
 			context.strokeStyle = "#000";
-			//context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
-			context.strokeText(`${this.state.mouseX - this.state.graphMargin}, ${this.state.mouseY - this.state.graphMargin}`, this.state.mouseX, this.state.mouseY);
+			context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
+			//context.strokeText(`${this.state.mouseX - this.state.graphMargin}, ${this.state.mouseY - this.state.graphMargin}`, this.state.mouseX, this.state.mouseY);
 		}
 		context.stroke();
 		context.closePath();
