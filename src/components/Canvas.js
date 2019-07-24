@@ -38,7 +38,7 @@ class Canvas extends Component
 			}, () => {
 				console.log(this.state.yAxisCD, this.state.xAxisCD);
 			});
-			//console.log(this.props.xAxis, this.props.yAxis);
+			console.log(this.props.xAxis, this.props.yAxis);
 		}
 	}
 
@@ -52,7 +52,7 @@ class Canvas extends Component
 		let stepSize = 0;
 		for(var i= this.state.graphMargin; i<= (this.state.graphCanvas.width - this.state.graphMargin) && parseInt(this.getMinElement(this.props.xAxis)+stepSize) <= this.getMaxElement(this.props.xAxis)+this.state.xAxisCD; i += this.state.graphBoxSize)
 		{
-			context.strokeText(`${parseInt(this.getMinElement(this.props.xAxis)+stepSize)}`, i, (this.state.graphCanvas.height - this.state.graphMargin)+this.state.graphPointsMargin);
+			context.strokeText(`${parseInt(this.getMinElement(this.props.xAxis) > 0 ?stepSize : this.getMinElement(this.props.xAxis)+ stepSize)}`, i, (this.state.graphCanvas.height - this.state.graphMargin)+this.state.graphPointsMargin);
 			stepSize += this.state.xAxisCD;
 		}
 		context.closePath();
@@ -67,7 +67,7 @@ class Canvas extends Component
 		} */
 		for(i=this.state.graphMargin;i<= (this.state.graphCanvas.height - this.state.graphMargin) && parseInt(this.getMinElement(this.props.yAxis)+ stepSize) <= this.getMaxElement(this.props.yAxis)+this.state.yAxisCD ;i+= this.state.graphBoxSize)
 		{
-			context.strokeText(`${parseInt(this.getMinElement(this.props.yAxis)+ stepSize)}`, this.state.graphMargin - this.state.graphPointsMargin, i);
+			context.strokeText(`${parseInt(this.getMinElement(this.props.yAxis) > 0 ? stepSize :this.getMinElement(this.props.yAxis)+ stepSize)}`, this.state.graphMargin - this.state.graphPointsMargin, i);
 			stepSize += this.state.yAxisCD;
 		}
 		context.closePath();
@@ -91,19 +91,32 @@ class Canvas extends Component
 		ctx.beginPath();
 		this.props.yAxis.forEach((v,i) => {
 			{
-				let xOffsetPosition  = this.props.xAxis[i] % this.state.xAxisCD === 0 ?(this.state.graphMargin + (parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.graphBoxSize)):(this.state.graphMargin + (parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.graphBoxSize) + Math.abs(this.state.xAxisCD - this.props.xAxis[i]));
-				let yOffsetPosition = v % this.state.yAxisCD === 0 ?(this.state.graphMargin + parseInt(v / this.state.yAxisCD)* this.state.graphBoxSize) :(this.state.graphMargin + (parseInt(v / this.state.yAxisCD)* this.state.graphBoxSize) + Math.abs(this.state.yAxisCD - v));
+				let xOffset = (parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.graphBoxSize);
+				let yOffset = parseInt(v / this.state.yAxisCD)* this.state.graphBoxSize;
+				let xDifference = parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.xAxisCD;
+				let yDifference =  parseInt(v / this.state.yAxisCD) * this.state.yAxisCD;
+				//console.log(xDifference, this.props.xAxis[i], yDifference, v);
+				let xOffsetPosition  = this.props.xAxis[i] % this.state.xAxisCD === 0 ?
+					(this.state.graphMargin + xOffset):
+					(this.state.graphMargin + xOffset + Math.abs(xDifference - this.props.xAxis[i]));
+				let yOffsetPosition = v % this.state.yAxisCD === 0 ?
+					(this.state.graphMargin + yOffset) :
+					(this.state.graphMargin + yOffset + Math.abs(yDifference - v));
 				if(yOffsetPosition <= ( this.state.graphCanvas.height - this.state.graphMargin) && xOffsetPosition <=  (this.state.graphCanvas.width - this.state.graphMargin))
 				{
 					ctx.lineTo(xOffsetPosition, yOffsetPosition);
 					ctx.strokeText(`${this.props.xAxis[i]}, ${v}`, xOffsetPosition, yOffsetPosition);
-					ctx.arc( xOffsetPosition, yOffsetPosition, 4, 0, Math.PI*2, true);
+					ctx.strokeStyle = this.props.graphColor !== undefined ? this.props.graphColor : "#000";
+					ctx.stroke();
 					ctx.moveTo(xOffsetPosition, yOffsetPosition);
+					ctx.beginPath();
+					ctx.arc( xOffsetPosition, yOffsetPosition, 4, 0, Math.PI*2, true);
+					ctx.fillStyle = "#f00";
+					ctx.fill();
+					ctx.closePath();
 				}
 			}
 		});
-		ctx.fillStyle= "#a4a4a4";
-		ctx.fill();
 		ctx.closePath();
 	}
 
@@ -150,7 +163,7 @@ class Canvas extends Component
 		//xaxis
 		context.moveTo(this.state.graphMargin, (this.state.graphCanvas.height -this.state.graphMargin));
 		context.lineTo((this.state.graphCanvas.width - this.state.graphMargin), (this.state.graphCanvas.height - this.state.graphMargin));
-		context.strokeStyle = "#000 solid";
+		context.strokeStyle = "#000";
 		context.stroke();
 		context.closePath();
 	}
@@ -169,6 +182,13 @@ class Canvas extends Component
 		{
 			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) * (this.getMinElement(this.props.xAxis) + this.state.xAxisCD));
 			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * (this.getMinElement(this.props.yAxis)+this.state.yAxisCD));
+			/* this.props.yAxis.forEach((v,i) => {
+				if(xValue === this.props.xAxis[i] && yValue === v)
+				{
+					context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
+				}
+			}); */
+			context.strokeStyle = "#000";
 			context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
 		}
 		context.stroke();
