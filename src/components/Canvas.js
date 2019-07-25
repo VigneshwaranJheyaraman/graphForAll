@@ -42,6 +42,7 @@ class Canvas extends Component
 		this.inputColorPickerRef = React.createRef();
 		this.graphColorPicker = this.graphColorPicker.bind(this);
 		this.checkColorChangerClicked = this.checkColorChangerClicked.bind(this);
+		this.captureWheelMovement = this.captureWheelMovement.bind(this);
 	}
 	componentWillMount()
 	{
@@ -386,11 +387,29 @@ class Canvas extends Component
 		}
 	}
 
+	captureWheelMovement(e)
+	{
+		e.preventDefault();
+		e.stopPropagation();
+		if(e.deltaY < 0)
+		{
+			//up
+			let prevBoxSize = this.state.graphBoxSize;
+			this.setState({graphBoxSize: prevBoxSize<= (this.state.graphCanvas.width - this.state.graphMargin)? prevBoxSize + 40: prevBoxSize});
+		}
+		else
+		{
+			//down
+			let prevBoxSize = this.state.graphBoxSize;
+			this.setState({graphBoxSize: prevBoxSize> 40 ? prevBoxSize - 40: prevBoxSize});
+		}
+	}
+
 	render()
 	{
 		return (
 			<div>
-				<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement} onClick= {this.handleClickEvent}/>
+				<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement} onClick= {this.handleClickEvent} onWheel ={this.captureWheelMovement}/>
 				<input type="color" hidden={true} ref={this.inputColorPickerRef} onChange = {(e) => {
 					let color = e.target.value;
 					this.setState({graphColor : color});
