@@ -14,7 +14,7 @@ function App() {
   });
   return (
     <div className="container-fluid" ref= {divRef}>
-      <OptimizedCanvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
+      <Canvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
     </div>
   );
 }
