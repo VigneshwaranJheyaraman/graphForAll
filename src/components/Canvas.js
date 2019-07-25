@@ -15,7 +15,9 @@ class Canvas extends Component
 			rangeOfPoints: 20,
 			graphBoxSize:40,
 			resizeFactor:5,
-			coordMarkerWidth : 10
+			coordMarkerWidth : 10,
+			xAxis:[],
+			yAxis:{}
 		};
 		this.canvasRef = React.createRef();
 		this.getXAxisCD = this.getXAxisCD.bind(this);
@@ -37,9 +39,9 @@ class Canvas extends Component
 			this.setState({xAxisCD :  xmean ,
 				yAxisCD : ymean
 			}, () => {
-				console.log(this.state.yAxisCD, this.state.xAxisCD);
+				//console.log(this.state.yAxisCD, this.state.xAxisCD);
 			});
-			console.log(this.props.xAxis, this.props.yAxis);
+			//console.log(this.props.xAxis, this.props.yAxis);
 		}
 	}
 
@@ -102,13 +104,15 @@ class Canvas extends Component
 				let yOffset = parseInt(v / this.state.yAxisCD)* this.state.graphBoxSize;
 				let xDifference = parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.xAxisCD;
 				let yDifference =  parseInt(v / this.state.yAxisCD) * this.state.yAxisCD;
+				let xAdditional =Math.abs(xDifference - this.props.xAxis[i]) * (this.state.graphBoxSize / this.state.xAxisCD);
+				let yAdditional =Math.abs(yDifference - v) * ( this.state.graphBoxSize / this.state.yAxisCD);
 				//console.log(xDifference, this.props.xAxis[i], yDifference, v);
 				let xOffsetPosition  = this.props.xAxis[i] === xDifference?
 					(this.state.graphMargin + xOffset):
-					(this.state.graphMargin + xOffset + Math.abs(xDifference - this.props.xAxis[i]));
+					(this.state.graphMargin + xOffset + xAdditional);
 				let yOffsetPosition = v === yDifference ?
 					(this.state.graphMargin + yOffset) :
-					(this.state.graphMargin + yOffset + Math.abs(yDifference - v));
+					(this.state.graphMargin + yOffset + yAdditional);
 				if(yOffsetPosition <= ( this.state.graphCanvas.height - this.state.graphMargin) && xOffsetPosition <=  (this.state.graphCanvas.width - this.state.graphMargin))
 				{
 					ctx.lineTo(xOffsetPosition, yOffsetPosition);
@@ -190,14 +194,14 @@ class Canvas extends Component
 			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) *  this.state.xAxisCD);
 			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * this.state.yAxisCD);
 			this.props.yAxis.forEach((v,i) => {
-				/* if(xValue === this.props.xAxis[i] && yValue === v)
+				if(xValue === this.props.xAxis[i] && yValue === v)
 				{
 					context.strokeStyle = "#000";
 					context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
-				} */
+				}
 			});
 			context.strokeStyle = "#000";
-			context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
+			//context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
 			//context.strokeText(`${this.state.mouseX - this.state.graphMargin}, ${this.state.mouseY - this.state.graphMargin}`, this.state.mouseX, this.state.mouseY);
 		}
 		context.stroke();
