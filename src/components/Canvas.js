@@ -17,7 +17,7 @@ class Canvas extends Component
 			resizeFactor:5,
 			coordMarkerWidth : 10,
 			xAxis:[],
-			yAxis:{}
+			yAxis:[]
 		};
 		this.canvasRef = React.createRef();
 		this.getXAxisCD = this.getXAxisCD.bind(this);
@@ -37,7 +37,9 @@ class Canvas extends Component
 			let xmean = this.getXAxisCD(this.props.xAxis);
 			let ymean = this.getYAxisCD(this.props.yAxis);
 			this.setState({xAxisCD :  xmean ,
-				yAxisCD : ymean
+				yAxisCD : ymean,
+				xAxis:this.props.xAxis,
+				yAxis: this.props.yAxis
 			}, () => {
 				//console.log(this.state.yAxisCD, this.state.xAxisCD);
 			});
@@ -55,7 +57,7 @@ class Canvas extends Component
 		let stepSize = 0;
 		for(var i= this.state.graphMargin; i<= (this.state.graphCanvas.width - this.state.graphMargin); i += this.state.graphBoxSize)
 		{
-			context.strokeText(`${parseInt(this.getMinElement(this.props.xAxis) > 0 ?stepSize : this.getMinElement(this.props.xAxis)+ stepSize)}`, i, (this.state.graphCanvas.height - this.state.graphMargin)+this.state.graphPointsMargin);
+			context.strokeText(`${parseInt(this.getMinElement(this.state.xAxis) > 0 ?stepSize : this.getMinElement(this.state.xAxis)+ stepSize)}`, i, (this.state.graphCanvas.height - this.state.graphMargin)+this.state.graphPointsMargin);
 			context.moveTo(i, (this.state.graphCanvas.height - this.state.graphMargin));
 			context.lineTo(i, (this.state.graphCanvas.height - this.state.graphMargin) - this.state.coordMarkerWidth);
 			context.stroke();
@@ -73,7 +75,7 @@ class Canvas extends Component
 		} */
 		for(i=this.state.graphMargin;i<= (this.state.graphCanvas.height - this.state.graphMargin);i+= this.state.graphBoxSize)
 		{
-			context.strokeText(`${parseInt(this.getMinElement(this.props.yAxis) > 0 ? stepSize :this.getMinElement(this.props.yAxis)+ stepSize)}`, this.state.graphMargin - this.state.graphPointsMargin, i);
+			context.strokeText(`${parseInt(this.getMinElement(this.state.yAxis) > 0 ? stepSize :this.getMinElement(this.state.yAxis)+ stepSize)}`, this.state.graphMargin - this.state.graphPointsMargin, i);
 			context.moveTo(this.state.graphMargin, i);
 			context.lineTo(this.state.graphMargin - this.state.coordMarkerWidth, i);
 			context.stroke();
@@ -98,16 +100,16 @@ class Canvas extends Component
 	{
 		let ctx = this.state.graphCanvas.getContext("2d");
 		ctx.beginPath();
-		this.props.yAxis.forEach((v,i) => {
+		this.state.yAxis.forEach((v,i) => {
 			{
-				let xOffset = (parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.graphBoxSize);
+				let xOffset = (parseInt(this.state.xAxis[i] / this.state.xAxisCD) * this.state.graphBoxSize);
 				let yOffset = parseInt(v / this.state.yAxisCD)* this.state.graphBoxSize;
-				let xDifference = parseInt(this.props.xAxis[i] / this.state.xAxisCD) * this.state.xAxisCD;
+				let xDifference = parseInt(this.state.xAxis[i] / this.state.xAxisCD) * this.state.xAxisCD;
 				let yDifference =  parseInt(v / this.state.yAxisCD) * this.state.yAxisCD;
-				let xAdditional =Math.abs(xDifference - this.props.xAxis[i]) * (this.state.graphBoxSize / this.state.xAxisCD);
+				let xAdditional =Math.abs(xDifference - this.state.xAxis[i]) * (this.state.graphBoxSize / this.state.xAxisCD);
 				let yAdditional =Math.abs(yDifference - v) * ( this.state.graphBoxSize / this.state.yAxisCD);
-				//console.log(xDifference, this.props.xAxis[i], yDifference, v);
-				let xOffsetPosition  = this.props.xAxis[i] === xDifference?
+				//console.log(xDifference, this.state.xAxis[i], yDifference, v);
+				let xOffsetPosition  = this.state.xAxis[i] === xDifference?
 					(this.state.graphMargin + xOffset):
 					(this.state.graphMargin + xOffset + xAdditional);
 				let yOffsetPosition = v === yDifference ?
@@ -116,7 +118,7 @@ class Canvas extends Component
 				if(yOffsetPosition <= ( this.state.graphCanvas.height - this.state.graphMargin) && xOffsetPosition <=  (this.state.graphCanvas.width - this.state.graphMargin))
 				{
 					ctx.lineTo(xOffsetPosition, yOffsetPosition);
-					ctx.strokeText(`${this.props.xAxis[i]}, ${v}`, xOffsetPosition, yOffsetPosition);
+					//ctx.strokeText(`${this.state.xAxis[i]}, ${v}`, xOffsetPosition, yOffsetPosition);
 					ctx.strokeStyle = this.props.graphColor !== undefined ? this.props.graphColor : "#000";
 					ctx.stroke();
 					ctx.moveTo(xOffsetPosition, yOffsetPosition);
@@ -193,8 +195,8 @@ class Canvas extends Component
 		{
 			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) *  this.state.xAxisCD);
 			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * this.state.yAxisCD);
-			this.props.yAxis.forEach((v,i) => {
-				if(xValue === this.props.xAxis[i] && yValue === v)
+			this.state.yAxis.forEach((v,i) => {
+				if(xValue === this.state.xAxis[i] && yValue === v)
 				{
 					context.strokeStyle = "#000";
 					context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
