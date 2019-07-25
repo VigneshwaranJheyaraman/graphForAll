@@ -395,7 +395,7 @@ class Canvas extends Component
 		{
 			//up
 			let prevBoxSize = this.state.graphBoxSize;
-			this.setState({graphBoxSize: prevBoxSize<= (this.state.graphCanvas.width - this.state.graphMargin)? prevBoxSize + 40: prevBoxSize});
+			this.setState({graphBoxSize: prevBoxSize<= (this.state.graphCanvas.height - this.state.graphMargin)? prevBoxSize + 40: prevBoxSize});
 		}
 		else
 		{
