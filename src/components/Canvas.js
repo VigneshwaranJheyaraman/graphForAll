@@ -316,7 +316,7 @@ class Canvas extends Component
 		context.fill();
 		context.closePath();
 		context.beginPath();
-		context.fillStyle = "#000";
+		context.fillStyle = this.props.graphColor !== undefined ? this.props.graphColor : "#000";;
 		context.fillRect( this.state.graphCanvas.width -this.state.graphMargin - (this.state.legnedPointsBottomMargin*3),this.state.graphMargin - this.state.legnedPointsBottomMargin,5,5 );
 		context.fillText("X-Axis", this.state.graphCanvas.width -this.state.graphMargin - (this.state.legendTitleTopMargin), this.state.graphMargin - this.state.legnedPointsBottomMargin +5);
 		context.fill();
