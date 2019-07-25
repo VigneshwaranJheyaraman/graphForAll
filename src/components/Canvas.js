@@ -22,7 +22,9 @@ class Canvas extends Component
 			legendWidth: 400,
 			legendTitleTopMargin : 20,
 			legnedPointsBottomMargin:10,
-			crossHairToggleValue:true
+			crossHairToggleValue:true,
+			colorPicker: null,
+			graphColor : null
 		};
 		this.canvasRef = React.createRef();
 		this.getXAxisCD = this.getXAxisCD.bind(this);
@@ -37,6 +39,9 @@ class Canvas extends Component
 		this.drawLegendPoints = this.drawLegendPoints.bind(this);
 		this.crossHairToggler = this.crossHairToggler.bind(this);
 		this.handleClickEvent = this.handleClickEvent.bind(this);
+		this.inputColorPickerRef = React.createRef();
+		this.graphColorPicker = this.graphColorPicker.bind(this);
+		this.checkColorChangerClicked = this.checkColorChangerClicked.bind(this);
 	}
 	componentWillMount()
 	{
@@ -48,7 +53,8 @@ class Canvas extends Component
 			this.setState({xAxisCD :  xmean ,
 				yAxisCD : ymean,
 				xAxis:this.props.xAxis,
-				yAxis: this.props.yAxis
+				yAxis: this.props.yAxis,
+				graphColor: this.props.graphColor !== undefined ? this.props.graphColor : "#000"
 			}, () => {
 				//console.log(this.state.yAxisCD, this.state.xAxisCD);
 			});
@@ -97,14 +103,10 @@ class Canvas extends Component
 
 	componentDidMount()
 	{
-		this.setState({graphCanvas : this.canvasRef.current}, () => {
+		this.setState({graphCanvas : this.canvasRef.current, colorPicker: this.inputColorPickerRef.current}, () => {
 			//proceed further
 			window.addEventListener("resize", this.resizer, false);
 			this.resizer();
-			this.plotAxesValues();
-			this.plotDataPoints();
-			this.drawLegend();
-			this.crossHairToggler(this.state.crossHairToggleValue);
 		});
 	}
 
@@ -132,7 +134,7 @@ class Canvas extends Component
 				{
 					ctx.lineTo(xOffsetPosition, yOffsetPosition);
 					//ctx.strokeText(`${this.state.xAxis[i]}, ${v}`, xOffsetPosition, yOffsetPosition);
-					ctx.strokeStyle = this.props.graphColor !== undefined ? this.props.graphColor : "#000";
+					ctx.strokeStyle = this.state.graphColor;
 					ctx.lineWidth = 1;
 					ctx.stroke();
 					ctx.moveTo(xOffsetPosition, yOffsetPosition);
@@ -176,6 +178,7 @@ class Canvas extends Component
 				this.plotDataPoints();
 				this.drawLegend();
 				this.crossHairToggler(this.state.crossHairToggleValue);
+				this.graphColorPicker();
 			});
 		}
 		catch(err)
@@ -289,6 +292,7 @@ class Canvas extends Component
 			this.plotDataPoints();
 			this.drawLegend();
 			this.crossHairToggler(this.state.crossHairToggleValue);
+			this.graphColorPicker();
 			if((this.state.mouseX >= this.state.graphMargin && this.state.mouseY >= this.state.graphMargin) && (this.state.mouseX <= (this.state.graphCanvas.width - this.state.graphMargin) && this.state.mouseY <= (this.state.graphCanvas.height - this.state.graphMargin)))
 			{
 				this.drawCrossHair(this.props.showCoord === undefined?this.state.crossHairToggleValue: this.props.showCoord);
@@ -322,7 +326,7 @@ class Canvas extends Component
 		context.fill();
 		context.closePath();
 		context.beginPath();
-		context.fillStyle = this.props.graphColor !== undefined ? this.props.graphColor : "#000";;
+		context.fillStyle = this.state.graphColor;
 		context.fillRect( this.state.graphCanvas.width -this.state.graphMargin - (this.state.legnedPointsBottomMargin*3),this.state.graphMargin - this.state.legnedPointsBottomMargin,5,5 );
 		context.fillText("X-Axis", this.state.graphCanvas.width -this.state.graphMargin - (this.state.legendTitleTopMargin), this.state.graphMargin - this.state.legnedPointsBottomMargin +5);
 		context.fill();
@@ -335,14 +339,14 @@ class Canvas extends Component
 		context.beginPath();
 		context.fillText("Cross-Hair Toggle Value", 0, this.state.legendTitleTopMargin);
 		toggleValue? context.fillStyle ="#000":context.fillStyle ="#fff";
-		context.arc(this.state.legendTitleTopMargin * 10, this.state.legendTitleTopMargin, 5, 0, Math.PI *2, false);
+		context.arc(context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin, 5, 0, Math.PI *2, false);
 		context.fill();
 		context.closePath();
 	}
 
 	checkToggleClicked(mx,my, arcX, arcY)
 	{
-		if (Math.pow((mx - arcX), 2) && Math.pow((my -  arcY),2) < 25)
+		if (Math.pow((mx - arcX), 2) + Math.pow((my -  arcY),2) < 25)
 		{
 			let chTV = this.state.crossHairToggleValue;
 			this.setState({crossHairToggleValue : !chTV}, () => {
@@ -355,15 +359,42 @@ class Canvas extends Component
 	handleClickEvent(e)
 	{
 		let rect = this.state.graphCanvas.getBoundingClientRect();
+		let context = this.state.graphCanvas.getContext("2d");
 		let mouseX = e.clientX - rect.left;
 		let mouseY = e.clientY - rect.top;
-		this.checkToggleClicked(mouseX, mouseY, this.state.legendTitleTopMargin * 10, this.state.legendTitleTopMargin);
+		this.checkToggleClicked(mouseX, mouseY, context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin);
+		this.checkColorChangerClicked(mouseX, mouseY, this.state.graphBoxSize *6, this.state.legendTitleTopMargin);
+	}
+
+
+	graphColorPicker()
+	{
+		let context = this.state.graphCanvas.getContext("2d");
+		context.beginPath();
+		context.arc(this.state.graphBoxSize*6, this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
+		context.fillStyle = this.state.graphColor;
+		context.fill();
+		context.closePath();
+	}
+
+	checkColorChangerClicked(mx,my, arcX, arcY)
+	{
+		if(Math.pow((mx- arcX), 2) + Math.pow((my-arcY) , 2)< 100)
+		{
+			this.inputColorPickerRef.current.click();
+		}
 	}
 
 	render()
 	{
 		return (
-			<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement} onClick= {this.handleClickEvent}/>
+			<div>
+				<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement} onClick= {this.handleClickEvent}/>
+				<input type="color" hidden={true} ref={this.inputColorPickerRef} onChange = {(e) => {
+					let color = e.target.value;
+					this.setState({graphColor : color});
+				}}/>
+			</div>
 		);
 	}
 }
