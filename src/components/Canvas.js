@@ -136,6 +136,7 @@ class Canvas extends Component
 	resizer()
 	{
 		let graphCanvas = this.state.graphCanvas;
+		//console.log(this.props.parentRef.clientWidth);	
 /*         if(graphCanvas.width < window.innerWidth || graphCanvas.height < window.innerHeight)
 		{
 			//expanded screen
@@ -148,16 +149,23 @@ class Canvas extends Component
 			let gBs = this.state.graphBoxSize > 0? this.state.graphBoxSize + 5 : this.state.graphBoxSize;
 			this.setState({graphBoxSize: gBs});
 		} */
-		graphCanvas.width = window.innerWidth -this.state.resizeFactor;
-		graphCanvas.height = window.innerHeight -this.state.resizeFactor;
-		this.setState({graphCanvas: graphCanvas}, () => {
-			let context = this.state.graphCanvas.getContext("2d");
-			context.fillStyle = "slategray";
-			context.fillRect(0,0,this.state.graphCanvas.width, this.state.graphCanvas.height);
-			this.drawAxes();
-			this.plotAxesValues();
-			this.plotDataPoints();
-		});
+		try
+		{
+			graphCanvas.width = this.props.parentRef.clientWidth -this.state.resizeFactor;
+			graphCanvas.height = this.props.parentRef.clientHeight -this.state.resizeFactor;
+			this.setState({graphCanvas: graphCanvas}, () => {
+				let context = this.state.graphCanvas.getContext("2d");
+				context.fillStyle = "slategray";
+				context.fillRect(0,0,this.state.graphCanvas.width, this.state.graphCanvas.height);
+				this.drawAxes();
+				this.plotAxesValues();
+				this.plotDataPoints();
+			});
+		}
+		catch(err)
+		{
+			console.log(err);
+		}
 	}
 
 	componentWillUnmount()
