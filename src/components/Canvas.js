@@ -21,7 +21,8 @@ class Canvas extends Component
 			pointArcColor : "#f00",
 			legendWidth: 400,
 			legendTitleTopMargin : 20,
-			legnedPointsBottomMargin:10
+			legnedPointsBottomMargin:10,
+			crossHairToggleValue:true
 		};
 		this.canvasRef = React.createRef();
 		this.getXAxisCD = this.getXAxisCD.bind(this);
@@ -34,6 +35,8 @@ class Canvas extends Component
 		this.plotDataPoints = this.plotDataPoints.bind(this);
 		this.drawLegend = this.drawLegend.bind(this);
 		this.drawLegendPoints = this.drawLegendPoints.bind(this);
+		this.crossHairToggler = this.crossHairToggler.bind(this);
+		this.handleClickEvent = this.handleClickEvent.bind(this);
 	}
 	componentWillMount()
 	{
@@ -101,6 +104,7 @@ class Canvas extends Component
 			this.plotAxesValues();
 			this.plotDataPoints();
 			this.drawLegend();
+			this.crossHairToggler(this.state.crossHairToggleValue);
 		});
 	}
 
@@ -171,6 +175,7 @@ class Canvas extends Component
 				this.plotAxesValues();
 				this.plotDataPoints();
 				this.drawLegend();
+				this.crossHairToggler(this.state.crossHairToggleValue);
 			});
 		}
 		catch(err)
@@ -201,19 +206,19 @@ class Canvas extends Component
 		context.closePath();
 	}
 
-	drawCrossHair(showCoord)
+	drawCrossHair(showCoordandCH)
 	{
-		var context = this.state.graphCanvas.getContext("2d");
-		context.beginPath();
-		//x-axis crosshair
-		context.moveTo(this.state.mouseX, this.state.graphMargin);
-		context.lineTo(this.state.mouseX, (this.state.graphCanvas.height - this.state.graphMargin));
-		//y-axis crosshair
-		context.moveTo(this.state.graphMargin, this.state.mouseY);
-		context.lineTo((this.state.graphCanvas.width - this.state.graphMargin),this.state.mouseY );
-		context.lineWidth = 1;
-		if(showCoord)
+		if(showCoordandCH)
 		{
+			var context = this.state.graphCanvas.getContext("2d");
+			context.beginPath();
+			//x-axis crosshair
+			context.moveTo(this.state.mouseX, this.state.graphMargin);
+			context.lineTo(this.state.mouseX, (this.state.graphCanvas.height - this.state.graphMargin));
+			//y-axis crosshair
+			context.moveTo(this.state.graphMargin, this.state.mouseY);
+			context.lineTo((this.state.graphCanvas.width - this.state.graphMargin),this.state.mouseY );
+			context.lineWidth = 1;
 			let xValue = parseInt(((this.state.mouseX - this.state.graphMargin) / this.state.graphBoxSize) *  this.state.xAxisCD);
 			let yValue  = parseInt(((this.state.mouseY  - this.state.graphMargin)/ this.state.graphBoxSize) * this.state.yAxisCD);
 			this.state.yAxis.forEach((v,i) => {
@@ -227,9 +232,9 @@ class Canvas extends Component
 			context.strokeStyle = "#000";
 			//context.strokeText(`${xValue}, ${yValue}`, this.state.mouseX, this.state.mouseY);
 			//context.strokeText(`${this.state.mouseX - this.state.graphMargin}, ${this.state.mouseY - this.state.graphMargin}`, this.state.mouseX, this.state.mouseY);
+			context.stroke();
+			context.closePath();
 		}
-		context.stroke();
-		context.closePath();
 	}
 
 	getMaxElement(dataset)
@@ -283,9 +288,10 @@ class Canvas extends Component
 			//console.log(this.state.mouseX, this.state.mouseY);
 			this.plotDataPoints();
 			this.drawLegend();
+			this.crossHairToggler(this.state.crossHairToggleValue);
 			if((this.state.mouseX >= this.state.graphMargin && this.state.mouseY >= this.state.graphMargin) && (this.state.mouseX <= (this.state.graphCanvas.width - this.state.graphMargin) && this.state.mouseY <= (this.state.graphCanvas.height - this.state.graphMargin)))
 			{
-				this.drawCrossHair(this.props.showCoord === undefined?true: this.props.showCoord);
+				this.drawCrossHair(this.props.showCoord === undefined?this.state.crossHairToggleValue: this.props.showCoord);
 			}
 		});
 	}
@@ -323,11 +329,41 @@ class Canvas extends Component
 		context.closePath();
 	}
 
+	crossHairToggler(toggleValue)
+	{
+		let context = this.state.graphCanvas.getContext("2d");
+		context.beginPath();
+		context.fillText("Cross-Hair Toggle Value", 0, this.state.legendTitleTopMargin);
+		toggleValue? context.fillStyle ="#000":context.fillStyle ="#fff";
+		context.arc(this.state.legendTitleTopMargin * 10, this.state.legendTitleTopMargin, 5, 0, Math.PI *2, false);
+		context.fill();
+		context.closePath();
+	}
+
+	checkToggleClicked(mx,my, arcX, arcY)
+	{
+		if (Math.pow((mx - arcX), 2) && Math.pow((my -  arcY),2) < 25)
+		{
+			let chTV = this.state.crossHairToggleValue;
+			this.setState({crossHairToggleValue : !chTV}, () => {
+				//console.log(this.state.crossHairToggleValue)
+			});
+		}
+	}
+
+
+	handleClickEvent(e)
+	{
+		let rect = this.state.graphCanvas.getBoundingClientRect();
+		let mouseX = e.clientX - rect.left;
+		let mouseY = e.clientY - rect.top;
+		this.checkToggleClicked(mouseX, mouseY, this.state.legendTitleTopMargin * 10, this.state.legendTitleTopMargin);
+	}
 
 	render()
 	{
 		return (
-			<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement}/>
+			<canvas ref={this.canvasRef} onMouseMove = {this.handleMouseMovement} onClick= {this.handleClickEvent}/>
 		);
 	}
 }

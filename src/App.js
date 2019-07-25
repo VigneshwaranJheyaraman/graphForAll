@@ -13,7 +13,7 @@ function App() {
   });
   return (
     <div className="container-fluid" ref= {divRef}>
-      <Canvas yAxis={getRandomList(50)} xAxis={getRandomList(50)} graphColor= "#acd213" parentRef = {currentRef}/>
+      <Canvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
     </div>
   );
 }
@@ -21,9 +21,11 @@ function App() {
 function getRandomList(size)
 {
   let randomNumbers =[];
-  for(var i=0;i<size;i++)
+  let min = 1;
+  for(var i=1;i<=size;i++)
   {
-    randomNumbers.push(Math.floor(Math.random() * size));
+    let max = i;
+    randomNumbers.push(Math.floor(Math.random() * max - min) + min);
   }
   return randomNumbers;
 }
