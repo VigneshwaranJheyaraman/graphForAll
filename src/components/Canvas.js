@@ -363,7 +363,7 @@ class Canvas extends Component
 		let mouseX = e.clientX - rect.left;
 		let mouseY = e.clientY - rect.top;
 		this.checkToggleClicked(mouseX, mouseY, context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin);
-		this.checkColorChangerClicked(mouseX, mouseY, this.state.graphBoxSize *6, this.state.legendTitleTopMargin);
+		this.checkColorChangerClicked(mouseX, mouseY,this.state.graphBoxSize * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin);
 	}
 
 
@@ -371,7 +371,8 @@ class Canvas extends Component
 	{
 		let context = this.state.graphCanvas.getContext("2d");
 		context.beginPath();
-		context.arc(this.state.graphBoxSize*6, this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
+		context.fillText("Color Picker", this.state.graphBoxSize*6, this.state.legendTitleTopMargin);
+		context.arc(this.state.graphBoxSize * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
 		context.fillStyle = this.state.graphColor;
 		context.fill();
 		context.closePath();
