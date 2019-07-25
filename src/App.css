@@ -3,7 +3,7 @@
   text-align: center;
   background-color: slategray;
 }
-.container-fluid div canvas
+.container-fluid canvas
 {
   background-color: slategray;
 }
@@ -15,4 +15,18 @@
 #root .container-fluid , .container-fluid
 {
   height: 100%;
+}
+.layerCanvas
+{
+  position: relative;
+}
+#axesCanvas, #plotCanvas
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#plotCanvas
+{
+  background-color: transparent;
 }

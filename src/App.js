@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import Canvas from './components/Canvas';
+import OptimizedCanvas from './components/OptimizedCanvas';
 
 function App() {
   //      <Canvas yAxis={[21,4,21,32,5,67,9,34,21,54,56,32,74,53,34,78,0,81]} xAxis={[72,54,12,23,78,78,23,78,32,98,77,32,43,86,56,42,21]}/>
@@ -13,7 +14,7 @@ function App() {
   });
   return (
     <div className="container-fluid" ref= {divRef}>
-      <Canvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
+      <OptimizedCanvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
     </div>
   );
 }
