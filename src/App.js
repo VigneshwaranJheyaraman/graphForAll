@@ -11,10 +11,10 @@ function App() {
   var [currentRef, setCurrentRef] =  useState(null);
   useEffect(() => {
     setCurrentRef(divRef.current);
-  });
+  }, [divRef]);
   return (
     <div className="container-fluid" ref= {divRef}>
-      <Canvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
+      <OptimizedCanvas yAxis={getRandomList(100)} xAxis={getRandomList(100)} graphColor= "#acd213" parentRef = {currentRef}/>
     </div>
   );
 }

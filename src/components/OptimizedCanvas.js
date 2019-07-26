@@ -25,7 +25,8 @@ class OptimizedCanvas extends Component
 			legnedPointsBottomMargin:10,
 			crossHairToggleValue:true,
 			colorPicker: null,
-			graphColor : null
+			graphColor : null,
+			colorPickerPosition:40
 		};
 		this.axesCanvasRef = React.createRef();
 		this.plotCanvasRef = React.createRef();
@@ -70,15 +71,24 @@ class OptimizedCanvas extends Component
 	initPlotCanvas()
 	{
 		let context = this.state.plotCanvas.getContext("2d");
-		context.fillStyle = "slategray";
-		context.fillRect(0,0,this.state.plotCanvas.width, this.state.plotCanvas.height);
+		context.clearRect(
+			0,
+			0,
+			this.state.plotCanvas.width, 
+			this.state.plotCanvas.height);
+		this.plotDataPoints();
+		this.crossHairToggler(this.state.crossHairToggleValue);
+		this.graphColorPicker();
+			
 	}
 
 	initAxesCanvas()
 	{
 		let context = this.state.axesCanvas.getContext("2d");
-		context.fillStyle = "slategray";
-		context.fillRect(0,0,this.state.axesCanvas.width, this.state.axesCanvas.height);
+		context.clearRect(0,0,this.state.axesCanvas.width, this.state.axesCanvas.height);
+		this.drawAxes();
+		this.plotAxesValues();
+		this.drawLegend();
 	}
 
 	plotAxesValues()
@@ -192,14 +202,8 @@ class OptimizedCanvas extends Component
 			plotCanvas.width = this.props.parentRef.clientWidth -this.state.resizeFactor;
 			plotCanvas.height = this.props.parentRef.clientHeight -this.state.resizeFactor;
 			this.setState({axesCanvas: axesCanvas, plotCanvas: plotCanvas}, () => {
-				this.initPlotCanvas();
 				this.initAxesCanvas();
-				this.plotDataPoints();
-				this.crossHairToggler(this.state.crossHairToggleValue);
-				this.graphColorPicker();
-				this.drawAxes();
-				this.plotAxesValues();
-				this.drawLegend();
+				this.initPlotCanvas();
 			});
 		}
 		catch(err)
@@ -306,13 +310,8 @@ class OptimizedCanvas extends Component
 			mouseY : e.clientY - rect.top
 		}, () => {
 			//drawuCrosshair
-			this.state.plotCanvas.getContext("2d").clearRect(0, 0, this.state.plotCanvas.width, this.state.plotCanvas.height);
-			this.plotDataPoints();
-			this.crossHairToggler(this.state.crossHairToggleValue);
-			this.graphColorPicker();
-			this.drawAxes();
-			this.plotAxesValues();
-			this.drawLegend();
+			this.initAxesCanvas();
+			this.initPlotCanvas();
 			if((this.state.mouseX >= this.state.graphMargin && this.state.mouseY >= this.state.graphMargin) && (this.state.mouseX <= (this.state.plotCanvas.width - this.state.graphMargin) && this.state.mouseY <= (this.state.plotCanvas.height - this.state.graphMargin)))
 			{
 				this.drawCrossHair(this.props.showCoord === undefined?this.state.crossHairToggleValue: this.props.showCoord);
@@ -340,6 +339,7 @@ class OptimizedCanvas extends Component
 		let context = this.state.axesCanvas.getContext("2d");
 		context.beginPath();
 		let x = (this.state.axesCanvas.width - this.state.legendWidth);
+		context.fillStyle = this.state.pointArcColor;
 		context.fillRect(x + this.state.legnedPointsBottomMargin,this.state.graphMargin - this.state.legnedPointsBottomMargin,5,5);
 		context.fillStyle = this.state.pointArcColor;
 		context.fillText("Y-axis", x + (this.state.legnedPointsBottomMargin * 3), this.state.graphMargin - this.state.legnedPointsBottomMargin +5);
@@ -357,6 +357,7 @@ class OptimizedCanvas extends Component
 	{
 		let context = this.state.plotCanvas.getContext("2d");
 		context.beginPath();
+		context.fillStyle = "#0f0";
 		context.fillText("Cross-Hair Toggle Value", 0, this.state.legendTitleTopMargin);
 		toggleValue? context.fillStyle ="#000":context.fillStyle ="#fff";
 		context.arc(context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin, 5, 0, Math.PI *2, false);
@@ -384,7 +385,7 @@ class OptimizedCanvas extends Component
 		let mouseX = e.clientX - rect.left;
 		let mouseY = e.clientY - rect.top;
 		this.checkToggleClicked(mouseX, mouseY, context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin);
-		this.checkColorChangerClicked(mouseX, mouseY,this.state.graphBoxSize * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin);
+		this.checkColorChangerClicked(mouseX, mouseY,this.state.colorPickerPosition * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin);
 	}
 
 
@@ -392,8 +393,8 @@ class OptimizedCanvas extends Component
 	{
 		let context = this.state.plotCanvas.getContext("2d");
 		context.beginPath();
-		context.fillText("Color Picker", this.state.graphBoxSize*6, this.state.legendTitleTopMargin);
-		context.arc(this.state.graphBoxSize * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
+		context.fillText("Color Picker", this.state.colorPickerPosition*6, this.state.legendTitleTopMargin);
+		context.arc(this.state.colorPickerPosition * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
 		context.fillStyle = this.state.graphColor;
 		context.fill();
 		context.closePath();
@@ -409,19 +410,24 @@ class OptimizedCanvas extends Component
 
 	captureWheelMovement(e)
 	{
-		e.preventDefault();
 		e.stopPropagation();
 		if(e.deltaY < 0)
 		{
 			//up
 			let prevBoxSize = this.state.graphBoxSize;
-			this.setState({graphBoxSize: prevBoxSize<= (this.state.axesCanvas.height - this.state.graphMargin)? prevBoxSize + 40: prevBoxSize});
+			this.setState({graphBoxSize: prevBoxSize<= (this.state.axesCanvas.height - this.state.graphMargin)? prevBoxSize + 40: prevBoxSize}, () =>{
+				this.initPlotCanvas();
+				this.initAxesCanvas();
+			});
 		}
 		else
 		{
 			//down
 			let prevBoxSize = this.state.graphBoxSize;
-			this.setState({graphBoxSize: prevBoxSize> 40 ? prevBoxSize - 40: prevBoxSize});
+			this.setState({graphBoxSize: prevBoxSize> 40 ? prevBoxSize - 40: prevBoxSize}, () => {
+				this.initPlotCanvas();
+				this.initAxesCanvas();
+			});
 		}
 	}
 
