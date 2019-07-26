@@ -357,9 +357,14 @@ class OptimizedCanvas extends Component
 	{
 		let context = this.state.plotCanvas.getContext("2d");
 		context.beginPath();
+		context.fillStyle = "#fff";
+		context.arc(context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin, 10, 0, Math.PI *2, false)
+		context.fill();
+		context.closePath();
+		context.beginPath();
 		context.fillStyle = "#0f0";
 		context.fillText("Cross-Hair Toggle Value", 0, this.state.legendTitleTopMargin);
-		toggleValue? context.fillStyle ="#000":context.fillStyle ="#fff";
+		toggleValue? context.fillStyle ="#000":context.fillStyle ="#a4a4a4";
 		context.arc(context.measureText("Cross-Hair Toggle Value").width + this.state.legendTitleTopMargin, this.state.legendTitleTopMargin, 5, 0, Math.PI *2, false);
 		context.fill();
 		context.closePath();
@@ -393,6 +398,12 @@ class OptimizedCanvas extends Component
 	{
 		let context = this.state.plotCanvas.getContext("2d");
 		context.beginPath();
+		context.strokeStyle = "#000";
+		context.strokeRect(this.state.colorPickerPosition * 6.63+ context.measureText("Color Picker").width ,5, 30, 30);
+		context.stroke();
+		context.closePath();
+		context.beginPath();
+		context.fillStyle = "#0f0";
 		context.fillText("Color Picker", this.state.colorPickerPosition*6, this.state.legendTitleTopMargin);
 		context.arc(this.state.colorPickerPosition * 7+ context.measureText("Color Picker").width ,this.state.legendTitleTopMargin, 10, 0, Math.PI*2, false);
 		context.fillStyle = this.state.graphColor;
